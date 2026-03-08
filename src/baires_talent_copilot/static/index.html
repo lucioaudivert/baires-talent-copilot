@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baires Talent Copilot</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <div class="app-shell">
+      <section id="auth-panel" class="auth-panel panel">
+        <div class="auth-copy">
+          <p class="eyebrow">Recruiter access</p>
+          <h1>Baires Talent Copilot</h1>
+          <p class="lead">
+            Sign in to manage private screenings, role profiles, and recruiter-facing AI summaries.
+          </p>
+        </div>
+
+        <div class="auth-grid">
+          <form id="login-form" class="auth-card form">
+            <div class="panel-head slim">
+              <div>
+                <p class="eyebrow">Welcome back</p>
+                <h2>Sign in</h2>
+              </div>
+            </div>
+
+            <label>
+              <span>Email</span>
+              <input id="login-email" type="email" placeholder="recruiter@company.com" required />
+            </label>
+
+            <label>
+              <span>Password</span>
+              <input id="login-password" type="password" placeholder="••••••••" required />
+            </label>
+
+            <div class="button-row">
+              <button type="submit" class="button primary">Sign In</button>
+              <button id="fill-demo" type="button" class="button ghost">Use Demo Credentials</button>
+            </div>
+          </form>
+
+          <form id="register-form" class="auth-card form">
+            <div class="panel-head slim">
+              <div>
+                <p class="eyebrow">First session</p>
+                <h2>Create recruiter account</h2>
+              </div>
+            </div>
+
+            <label>
+              <span>Display name</span>
+              <input id="register-display-name" placeholder="Lucio Recruiter" required />
+            </label>
+
+            <label>
+              <span>Email</span>
+              <input id="register-email" type="email" placeholder="lucio@company.com" required />
+            </label>
+
+            <label>
+              <span>Password</span>
+              <input id="register-password" type="password" placeholder="At least 8 characters" required />
+            </label>
+
+            <button type="submit" class="button primary">Create Account</button>
+          </form>
+
+          <article id="demo-card" class="demo-card hidden">
+            <p class="eyebrow">Portfolio demo</p>
+            <h2>Seeded recruiter account</h2>
+            <p class="muted">
+              Use the demo account if you only want to explore the product flow without registering.
+            </p>
+
+            <div class="demo-row">
+              <span class="mini-label">Display name</span>
+              <strong id="demo-display-name">Demo Recruiter</strong>
+            </div>
+            <div class="demo-row">
+              <span class="mini-label">Email</span>
+              <strong id="demo-email">recruiter@baires.demo</strong>
+            </div>
+            <div class="demo-row">
+              <span class="mini-label">Password</span>
+              <strong id="demo-password">TalentDemo2026!</strong>
+            </div>
+
+            <p class="auth-note">
+              This demo account is public by design for portfolio review. Use a personal account if you want isolated data.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <p id="status-line" class="status-line">Sign in to start.</p>
+
+      <div id="workspace" class="workspace hidden">
+        <header class="hero panel">
+          <div class="account-bar">
+            <div class="account-copy">
+              <p class="eyebrow">Authenticated recruiter</p>
+              <strong id="account-name">Recruiter</strong>
+              <p id="account-email" class="muted">recruiter@company.com</p>
+            </div>
+            <button id="logout-button" class="button ghost">Sign Out</button>
+          </div>
+
+          <div class="hero-copy">
+            <p class="eyebrow">Private recruiter cockpit</p>
+            <h1>Baires Talent Copilot</h1>
+            <p class="lead">
+              Structured screening, explainable summaries, and follow-up questions for human review.
+            </p>
+          </div>
+
+          <div class="hero-actions">
+            <button id="bootstrap-demo" class="button primary">Load Demo Workflow</button>
+            <button id="refresh-data" class="button ghost">Refresh Board</button>
+          </div>
+
+          <div class="hero-stats">
+            <article class="stat">
+              <span class="stat-label">Roles</span>
+              <strong id="roles-count">0</strong>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Screenings</span>
+              <strong id="screenings-count">0</strong>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Review Ready</span>
+              <strong id="review-ready-count">0</strong>
+            </article>
+          </div>
+        </header>
+
+        <main class="layout">
+          <section class="panel stack">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Step 1</p>
+                <h2>Create role profile</h2>
+              </div>
+            </div>
+
+            <form id="role-form" class="stack form">
+              <label>
+                <span>Role title</span>
+                <input id="role-title" name="title" placeholder="AI Training Operations Specialist" required />
+              </label>
+
+              <div class="two-up">
+                <label>
+                  <span>Seniority</span>
+                  <input id="role-seniority" name="seniority" placeholder="mid" required />
+                </label>
+
+                <label>
+                  <span>Language</span>
+                  <input id="role-language" name="language" placeholder="es" value="es" required />
+                </label>
+              </div>
+
+              <label>
+                <span>Summary</span>
+                <textarea
+                  id="role-summary"
+                  name="summary"
+                  rows="4"
+                  placeholder="Profile for LLM operations, QA workflows, prompt analysis, and client collaboration."
+                  required
+                ></textarea>
+              </label>
+
+              <label>
+                <span>Must-have skills</span>
+                <input
+                  id="role-must-have"
+                  name="must-have"
+                  placeholder="Python, LLMs, Evaluation, Stakeholders"
+                />
+              </label>
+
+              <label>
+                <span>Nice-to-have skills</span>
+                <input
+                  id="role-nice-to-have"
+                  name="nice-to-have"
+                  placeholder="FastAPI, Education, Prompt design"
+                />
+              </label>
+
+              <button type="submit" class="button primary">Save Role Profile</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Current roles</p>
+                <h3>Hiring targets</h3>
+              </div>
+            </div>
+            <div id="roles-list" class="stack compact-list"></div>
+          </section>
+
+          <section class="panel stack">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Step 2</p>
+                <h2>Open screening</h2>
+              </div>
+            </div>
+
+            <form id="screening-form" class="stack form">
+              <label>
+                <span>Role</span>
+                <select id="screening-role-id" name="role_id" required></select>
+              </label>
+
+              <label>
+                <span>Candidate name</span>
+                <input
+                  id="candidate-name"
+                  name="candidate_name"
+                  placeholder="Julieta Acosta"
+                  required
+                />
+              </label>
+
+              <label>
+                <span>Candidate email</span>
+                <input
+                  id="candidate-email"
+                  name="candidate_email"
+                  placeholder="julieta@example.com"
+                />
+              </label>
+
+              <label>
+                <span>Intro notes</span>
+                <textarea
+                  id="candidate-intro-notes"
+                  name="intro_notes"
+                  rows="3"
+                  placeholder="Referral, sourcing notes, language preference, or context."
+                ></textarea>
+              </label>
+
+              <button type="submit" class="button primary">Create Screening</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Current screenings</p>
+                <h3>Pipeline board</h3>
+              </div>
+            </div>
+
+            <div class="pipeline-controls">
+              <label>
+                <span>Search</span>
+                <input
+                  id="pipeline-search"
+                  placeholder="Search candidate, email, role, or summary"
+                />
+              </label>
+
+              <label>
+                <span>Role filter</span>
+                <select id="pipeline-role-filter">
+                  <option value="">All roles</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="pipeline-statuses" class="status-filters">
+              <button class="filter-chip active" data-status="all" type="button">All</button>
+              <button class="filter-chip" data-status="draft" type="button">Draft</button>
+              <button class="filter-chip" data-status="in_progress" type="button">In Progress</button>
+              <button class="filter-chip" data-status="review_ready" type="button">Review Ready</button>
+            </div>
+
+            <div id="screenings-list" class="pipeline-board"></div>
+          </section>
+
+          <section class="panel detail-panel">
+            <div class="panel-head detail-head">
+              <div>
+                <p class="eyebrow">Step 3</p>
+                <h2>Run the conversation</h2>
+              </div>
+              <button id="run-analysis" class="button primary" type="button">Generate Analysis</button>
+            </div>
+
+            <div id="detail-empty" class="empty-state">
+              <h3>No screening selected</h3>
+              <p>Create a role, open a screening, or load the demo workflow to populate the board.</p>
+            </div>
+
+            <div id="detail-content" class="detail-content hidden">
+              <section class="detail-card summary-band">
+                <div>
+                  <p class="eyebrow">Selected screening</p>
+                  <h3 id="detail-candidate-name">Candidate</h3>
+                </div>
+                <div class="summary-meta">
+                  <span id="detail-status" class="pill">draft</span>
+                  <span id="detail-role-title" class="ghost-pill">Role title</span>
+                </div>
+              </section>
+
+              <section class="detail-grid">
+                <article class="detail-card">
+                  <p class="eyebrow">Context</p>
+                  <p id="detail-role-summary" class="text-block"></p>
+                  <p id="detail-intro-notes" class="text-block muted"></p>
+                </article>
+
+                <article class="detail-card">
+                  <p class="eyebrow">Signals</p>
+                  <div id="analysis-skills" class="chip-wrap"></div>
+                  <div id="analysis-missing" class="chip-wrap subdued"></div>
+                </article>
+              </section>
+
+              <section class="detail-card">
+                <div class="panel-head slim">
+                  <div>
+                    <p class="eyebrow">Conversation</p>
+                    <h3>Message timeline</h3>
+                  </div>
+                </div>
+
+                <div id="messages-list" class="messages"></div>
+
+                <form id="message-form" class="stack form form-tight">
+                  <div class="two-up">
+                    <label>
+                      <span>Speaker</span>
+                      <select id="message-speaker" name="speaker">
+                        <option value="candidate">Candidate</option>
+                        <option value="recruiter">Recruiter</option>
+                        <option value="assistant">Assistant</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      <span>Quick note</span>
+                      <input
+                        id="message-hint"
+                        placeholder="Example: follow-up, clarification, availability"
+                      />
+                    </label>
+                  </div>
+
+                  <label>
+                    <span>Message content</span>
+                    <textarea
+                      id="message-content"
+                      name="content"
+                      rows="4"
+                      placeholder="Paste the candidate or recruiter message here."
+                      required
+                    ></textarea>
+                  </label>
+
+                  <button type="submit" class="button ghost">Add Message</button>
+                </form>
+              </section>
+
+              <section class="detail-card">
+                <div class="panel-head slim">
+                  <div>
+                    <p class="eyebrow">Analysis</p>
+                    <h3>Explainable review output</h3>
+                  </div>
+                </div>
+
+                <p id="analysis-summary" class="text-block"></p>
+
+                <div class="analysis-grid">
+                  <article class="mini-card">
+                    <span class="mini-label">Confidence</span>
+                    <strong id="analysis-confidence">0.00</strong>
+                  </article>
+                  <article class="mini-card">
+                    <span class="mini-label">Analysis source</span>
+                    <strong id="analysis-source">heuristic</strong>
+                  </article>
+                  <article class="mini-card">
+                    <span class="mini-label">Recommended status</span>
+                    <strong id="analysis-status">draft</strong>
+                  </article>
+                </div>
+
+                <div>
+                  <p class="eyebrow">Follow-up questions</p>
+                  <ul id="analysis-questions" class="question-list"></ul>
+                </div>
+              </section>
+
+              <section class="detail-card">
+                <div class="panel-head slim">
+                  <div>
+                    <p class="eyebrow">Audit trail</p>
+                    <h3>Decision history</h3>
+                  </div>
+                </div>
+
+                <div id="audit-list" class="audit-list"></div>
+              </section>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>
