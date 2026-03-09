@@ -2,189 +2,161 @@
 
 Text-first screening copilot for recruiters and training teams.
 
-This v1 keeps the scope intentionally narrow. It focuses on structured intake, explainable summaries, and recruiter-friendly follow-up suggestions without adding voice, realtime streaming, or agent orchestration yet.
+## 60-Second Overview
 
-## Why This Project
+Early-stage screening is often noisy, hard to compare, and hard to audit.
 
-This project is the flagship piece for the portfolio. It combines:
-- conversational UX
-- applied AI workflows
-- recruiting and screening operations
-- psychology-informed product thinking
+Baires Talent Copilot solves that with a focused workflow:
+- define a role profile with required signals
+- run a structured screening chat
+- generate an explainable summary and follow-up questions
+- keep an audit trail of recruiter and system actions
+- keep final decisions human-led (`review_ready` is only a recommendation)
 
-## v1 Scope
+This project is intentionally narrow by design. It optimizes for clarity, traceability, and product execution over feature sprawl.
 
-- create role profiles
-- open candidate screenings
-- review screenings in a board view with search, filters, and drag-and-drop status changes
-- add chat messages to a screening
-- generate a structured analysis
-- keep an auditable timeline of recruiter and system actions
-- mark the screening as ready for human review
+## Why This Is a Strong Flagship Project
 
-## API Surface
+- End-to-end product slice: auth, API, persistence, UI, and tests
+- AI with guardrails: structured outputs + conservative fallback
+- Real workflow constraints: private recruiter-scoped data and auditable events
+- Practical engineering: works fully without paid AI APIs
 
-- `GET /health`
-- `GET /auth/config`
-- `POST /auth/register`
-- `POST /auth/login`
-- `GET /auth/me`
-- `POST /auth/logout`
-- `POST /roles`
-- `GET /roles`
-- `POST /screenings`
-- `GET /screenings`
-- `GET /screenings/{screening_id}`
-- `PATCH /screenings/{screening_id}/status`
-- `GET /screenings/{screening_id}/audit`
-- `POST /screenings/{screening_id}/messages`
-- `POST /screenings/{screening_id}/analysis`
+## Product Scope (v1)
 
-## Tech Direction
+- recruiter auth (register, login, logout, session restore)
+- role profile creation (must-have and nice-to-have skills)
+- screening pipeline board with search, filters, and drag-and-drop status updates
+- conversation timeline per screening
+- analysis generation with:
+  - `openai` mode when `OPENAI_API_KEY` is configured
+  - `heuristic` mode when no key is available
+- full audit timeline (`screening_created`, `message_added`, `analysis_generated`, `status_changed`, etc.)
+- seeded demo workflow (`POST /demo/bootstrap`) for fast portfolio review
 
-- FastAPI for the backend API
-- persistent storage through SQLModel
-- SQLite by default for quick local demos
-- Postgres-ready through `COPILOT_DATABASE_URL`
-- heuristic fallback when no API key is configured
-- OpenAI structured extraction when `OPENAI_API_KEY` is available
-- recruiter auth with token sessions and private recruiter-scoped data
-
-## Run Locally
+## Quick Demo (Local, 2 Minutes)
 
 ```bash
+cd baires-talent-copilot
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 uvicorn baires_talent_copilot.main:app --reload
 ```
 
-The recruiter-facing demo UI and API will be available at `http://localhost:8000`.
+Open:
+- App UI: `http://localhost:8000`
+- API docs: `http://localhost:8000/docs`
 
-By default the app writes to a local SQLite file. To use Postgres instead:
+Demo credentials (enabled by default):
+- Email: `recruiter@baires.demo`
+- Password: `TalentDemo2026!`
+
+After login, click `Load Demo Workflow` to populate a full recruiter flow instantly.
+
+## Tech Stack
+
+- FastAPI
+- SQLModel + SQLAlchemy
+- SQLite by default (`sqlite:///./baires_talent_copilot.db`)
+- Postgres-ready via `COPILOT_DATABASE_URL`
+- OpenAI Python SDK (`responses.parse`) for structured analysis
+- Plain HTML/CSS/JS frontend served by FastAPI
+- Pytest test suite
+
+## Key Engineering Decisions
+
+1. AI is optional, not a hard dependency
+- If `OPENAI_API_KEY` is missing or fails, analysis falls back to deterministic heuristics.
+
+2. Structured analysis output
+- Both AI and heuristic paths return the same `ScreeningAnalysisPayload` contract.
+
+3. Human-in-the-loop by default
+- Assistant output recommends status; recruiter can override and changes are audited.
+
+4. Data isolation per recruiter
+- Roles, screenings, and seeded demo data are scoped by authenticated user.
+
+5. Traceability as a first-class concern
+- Every meaningful action is persisted in audit events.
+
+6. Analysis invalidation on new evidence
+- Adding a message clears stale analysis and records `analysis_cleared`.
+
+## Configuration
+
+Copy `.env.example` or export variables directly:
 
 ```bash
-export COPILOT_DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/baires_talent_copilot"
+COPILOT_DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/baires_talent_copilot
+COPILOT_AUTH_SESSION_TTL_HOURS=168
+COPILOT_BOOTSTRAP_DEMO_USER=true
+COPILOT_DEMO_USER_EMAIL=recruiter@baires.demo
+COPILOT_DEMO_USER_PASSWORD=TalentDemo2026!
+COPILOT_DEMO_USER_DISPLAY_NAME=Demo Recruiter
+OPENAI_API_KEY=
+OPENAI_ANALYSIS_MODEL=gpt-4.1-mini
 ```
 
-The app also bootstraps a portfolio demo recruiter by default:
+## API Surface
 
-```bash
-export COPILOT_BOOTSTRAP_DEMO_USER=true
-export COPILOT_DEMO_USER_EMAIL="recruiter@baires.demo"
-export COPILOT_DEMO_USER_PASSWORD="TalentDemo2026!"
-export COPILOT_DEMO_USER_DISPLAY_NAME="Demo Recruiter"
-```
+Auth:
+- `GET /auth/config`
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me`
+- `POST /auth/logout`
 
-## Optional OpenAI Setup
+Workflow:
+- `POST /roles`
+- `GET /roles`
+- `POST /screenings`
+- `GET /screenings`
+- `GET /screenings/{screening_id}`
+- `PATCH /screenings/{screening_id}/status`
+- `POST /screenings/{screening_id}/messages`
+- `POST /screenings/{screening_id}/analysis`
+- `GET /screenings/{screening_id}/audit`
+- `POST /demo/bootstrap`
 
-If you want the screening analysis to use OpenAI instead of local rules:
+Utility:
+- `GET /health`
 
-```bash
-export OPENAI_API_KEY="your-key"
-export OPENAI_ANALYSIS_MODEL="gpt-4.1-mini"
-```
-
-Without those variables, the project still works and falls back to heuristic analysis.
-
-## Persistence Notes
-
-- role profiles, screenings, messages, and the latest analysis are now stored in the database
-- screening audit events are stored in the database for recruiter-facing traceability
-- manual status moves from the pipeline board are persisted and audited
-- auth sessions are stored in the database and can be revoked by logging out
-- each recruiter only sees their own roles, screenings, and seeded demo data
-- clicking `Load Demo Workflow` is idempotent and reuses the same seeded demo screening
-- adding a new message clears the previous analysis so the reviewer can regenerate it
-
-## Run Tests
+## Testing
 
 ```bash
 pytest
 ```
 
-## Example Flow
+Current tests cover:
+- auth flow (register/login/logout/session)
+- protected routes
+- recruiter data isolation
+- screening lifecycle and audit events
+- analysis generation behavior
+- prompt-building logic for OpenAI mode
 
-Open the browser and sign in:
-
-```bash
-http://localhost:8000
-```
-
-You can either register a recruiter account or use the default portfolio demo account:
+## Repository Layout
 
 ```text
-Email: recruiter@baires.demo
-Password: TalentDemo2026!
+src/baires_talent_copilot/
+  main.py              # FastAPI app and routes
+  auth.py              # auth, token session handling, password hashing
+  services.py          # core screening workflow logic
+  openai_analysis.py   # OpenAI structured analysis path
+  db.py                # engine/session setup
+  models.py            # SQLModel records
+  schemas.py           # Pydantic API contracts
+  static/              # recruiter-facing UI
+tests/
+  test_api.py
+  test_openai_analysis.py
 ```
 
-Or bootstrap a ready-made workflow after logging in:
+## Next Milestones
 
-```bash
-curl -X POST http://localhost:8000/demo/bootstrap
-```
-
-Register a recruiter:
-
-```bash
-curl -X POST http://localhost:8000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "display_name": "Lucio Recruiter",
-    "email": "lucio@example.com",
-    "password": "Talent1234!"
-  }'
-```
-
-Then create a role with the returned bearer token:
-
-```bash
-curl -X POST http://localhost:8000/roles \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "AI Recruiter Assistant",
-    "seniority": "mid",
-    "language": "es",
-    "summary": "Screening role for candidate operations",
-    "must_have_skills": ["Python", "FastAPI", "LLMs"],
-    "nice_to_have_skills": ["Postgres", "Prompt design"]
-  }'
-```
-
-Open a screening:
-
-```bash
-curl -X POST http://localhost:8000/screenings \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "role_id": 1,
-    "candidate_name": "Ana Lopez",
-    "candidate_email": "ana@example.com",
-    "intro_notes": "Candidate came from a referral."
-  }'
-```
-
-Add candidate messages:
-
-```bash
-curl -X POST http://localhost:8000/screenings/1/messages \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "speaker": "candidate",
-    "content": "I have worked with Python, FastAPI, and LLM evaluation flows."
-  }'
-```
-
-Generate the screening analysis:
-
-```bash
-curl -X POST http://localhost:8000/screenings/1/analysis \
-  -H "Authorization: Bearer <token>"
-```
-
-## Roadmap
-
-- add async audio transcription as a later milestone
+- add CI workflow (tests + lint on push/PR)
+- add role calibration/evaluation dataset for regression checks
+- add richer analytics around false positives and missing signals
+- add async transcription as a later multimodal step
