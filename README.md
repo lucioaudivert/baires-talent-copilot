@@ -1,5 +1,7 @@
 # Baires Talent Copilot
 
+[![CI](https://github.com/lucioaudivert/baires-talent-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/lucioaudivert/baires-talent-copilot/actions/workflows/ci.yml)
+
 Text-first screening copilot for recruiters and training teams.
 
 ## 60-Second Overview
